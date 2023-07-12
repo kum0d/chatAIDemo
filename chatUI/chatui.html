@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link href="./output.css" rel="stylesheet">
+		<script src="jquery-3.6.1.min.js"></script>
+		<title>Chat Page</title>
+
+	</head>
+
+	<style>
+		/* 自定义样式 */
+		html,
+		body {
+			height: 100%;
+		}
+
+		.chat-container {
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+		}
+
+		.chat-messages {
+			flex: 1;
+			overflow-y: auto;
+		}
+
+		.user-message {
+			justify-end;
+			align-self: flex-start;
+		}
+
+		.assistant-message {
+			align-self: flex-end;
+		}
+	</style>
+	</head>
+
+	<body>
+		<div class="chat-container">
+			<div class="flex-1 bg-gray-100 p-4 chat-messages" id="chat">
+				<!-- 聊天消息区域 -->
+
+				<!-- 更多消息... -->
+			</div>
+
+			<!-- 用户输入区域 -->
+			<div class="p-8">
+				<div class="flex">
+					<input type="text" id="userText"
+						class="flex-1 rounded-l-lg border border-gray-300 p-2 focus:outline-none"
+						placeholder="Type your message">
+					<button class="bg-blue-500 text-white rounded-r-lg px-4 py-2" onclick="sendMessage()" id="sendBtn">Send</button>
+				</div>
+			</div>
+		</div>
+
+		<script type="text/javascript">
+			var index = 0;
+
+			function chatResponse(message) {
+				var responseChat = '<div class="user-message mb-4">' +
+					'<div class="flex items-start space-x-4">' +
+					'<div class="bg-white rounded-lg p-2">' +
+					'<p class="text-sm text-gray-700">' + message + '</p>' +
+					'</div> </div> </div>';
+				$("#chat").append(responseChat);
+			}
+
+			async function sendMessage() {
+				var input = document.getElementById("userText");
+				var btn = document.getElementById("sendBtn");
+				if (input.value == "" || input.value == null) {
+					return;
+				}
+				userText = input.value;
+				var userChat = '<div class="user-message mb-4">' +
+					'<div class="flex items-start space-x-4">' +
+					'<div class="bg-blue-500 rounded-lg p-2">' +
+					'<p class="text-sm text-white">' + userText + '</p>' +
+					'</div> </div> </div>';
+				$("#chat").append(userChat);
+				input.value = "";
+				input.placeholder = 'Waiting the response';
+				btn.disabled = true;
+				input.disabled = true;
+				
+				const url = 'https://chatai-demo.854799920.workers.dev';
+				const question = {
+					'questionJson': userText
+				};
+
+				fetch(url, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify(question)
+					})
+					.then(response => response.json())
+					.then(data => {
+						console.log(data);
+						chatResponse(data.message);
+						input.disabled = false;
+						input.placeholder = 'Type your message';
+						btn.disabled = false;
+					})
+					.catch(error => {
+						chatResponse("error");
+						input.disabled = false;
+						input.placeholder = 'Type your message';
+						btn.disabled = false;
+						console.error('发生错误:', error);
+					});
+
+			}
+		</script>
+
+	</body>
+</html>
