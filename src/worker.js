@@ -40,7 +40,7 @@ export default {
           if (question == null || question == "") {
             return new Response('Invalid value', { status: 400 });
           }
-          const result = await chatReply(env);
+          const result = await chatReply(env,question);
           console.log(result);
           return new Response(JSON.stringify({ message: result }), {
             headers: {
@@ -60,7 +60,7 @@ export default {
   },
 };
 
-async function chatReply(env) {
+async function chatReply(env,question) {
 
   const pinecone = new PineconeClient();
   var queryEmbedding;
@@ -89,7 +89,7 @@ async function chatReply(env) {
   try {
     queryEmbedding = await openai.createEmbedding({
       model: "text-embedding-ada-002",
-      input: "how many girlfriends did gatsby have?",
+      input: question,
     });
   } catch (error) {
     console.log(error);
@@ -117,7 +117,7 @@ async function chatReply(env) {
   try {
     result = await openai.createChatCompletion({
       model: "gpt-3.5-turbo",
-      messages: [{ "role": "system", "content": concatenatedPageContent }, { "role": "user", "content": "answer how many girlfriends did gatsby have" }]
+      messages: [{ "role": "user", "content": concatenatedPageContent }, { "role": "user", "content": question }]
     });
   } catch (error) {
     console.log(error);
